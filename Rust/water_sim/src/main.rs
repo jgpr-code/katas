@@ -1,6 +1,10 @@
 use std::fmt;
+use std::io::*;
+use std::{thread, time};
 
 // ^ . | - > <
+
+// TODO refactor using windows function handling the borders will never be important if they are always Walls...
 
 #[derive(Debug)]
 struct Pool {
@@ -37,6 +41,40 @@ impl Pool {
             next_state: pool,
         }
     }
+
+    fn size(&self) -> usize {
+        self.current_state.len()
+    }
+
+    fn get_cell(&self, index: isize) -> Option<&WaterCell> {
+        if index < 0 || index >= self.size().try_into().unwrap() {
+            None
+        } else {
+            self.current_state.get(index as usize)
+        }
+    }
+
+    fn next_state(&mut self) {
+        for u in 0..self.size() {
+            let i = u as isize;
+            self.next_state[u] = next_cell(
+                self.get_cell(i - 1),
+                self.get_cell(i).unwrap(),
+                self.get_cell(i + 1),
+            );
+        }
+    }
+
+    fn drop_at(&mut self, index: usize) {
+        self.current_state[index] = WaterCell::Drop;
+    }
+
+    fn get_clear_string(&self) -> String {
+        let clearance = vec![0x0008 as u16; self.current_state.len()];
+        String::from_utf16(&clearance).expect("clear string construction didn't work as expected")
+    }
+
+    fn run_simulation_on_stdio() {}
 }
 
 impl fmt::Display for Pool {
@@ -226,6 +264,13 @@ fn handle_still_or_collision(surrounding: &Surrounding) -> WaterCell {
 
 fn main() {
     let pool = Pool::new(5);
+    let larger_pool = Pool::new(10);
     println!("{:?}", pool);
-    println!("{}", pool);
+    let one_sec = time::Duration::from_secs(1);
+    print!("{}", pool);
+    print!("{}", pool);
+    std::io::stdout().flush().unwrap();
+    thread::sleep(one_sec);
+    print!("{}", pool.get_clear_string());
+    print!("{}", larger_pool);
 }
