@@ -12,6 +12,8 @@ use std::{thread, time};
 // - WaterCell.rs
 // - ?
 
+// TODO optionally handle reflections at walls
+
 struct PoolSimulation {
     pool: Pool,
 }
