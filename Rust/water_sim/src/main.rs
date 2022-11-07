@@ -1,10 +1,20 @@
 use std::fmt;
 use std::io::*;
+use std::mem;
 use std::{thread, time};
 
-// ^ . | - > <
-
 // TODO refactor using windows function handling the borders will never be important if they are always Walls...
+// borders could also just be waves and model permanently incoming waves
+
+// TODO refactor into multiple files:
+// - PoolSimulation.rs
+// - Pool.rs
+// - WaterCell.rs
+// - ?
+
+struct PoolSimulation {
+    pool: Pool,
+}
 
 #[derive(Debug)]
 struct Pool {
@@ -25,6 +35,19 @@ enum WaterCell {
 enum Direction {
     Left,
     Right,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+struct Surrounding {
+    left: SurroundingType,
+    right: SurroundingType,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+enum SurroundingType {
+    NotImportant,
+    Wave,
+    Wall,
 }
 
 impl Pool {
@@ -63,6 +86,7 @@ impl Pool {
                 self.get_cell(i + 1),
             );
         }
+        mem::swap(&mut self.current_state, &mut self.next_state);
     }
 
     fn drop_at(&mut self, index: usize) {
@@ -74,7 +98,24 @@ impl Pool {
         String::from_utf16(&clearance).expect("clear string construction didn't work as expected")
     }
 
-    fn run_simulation_on_stdio() {}
+    fn run_simulation_on_stdio(&mut self) {
+        // TODO automatically stop sim after n-steps without change
+        let drop_frequency = 5;
+        let mut drop_after_steps = drop_frequency;
+        loop {
+            print!("{}", self);
+            std::io::stdout().flush().unwrap();
+            self.next_state();
+            drop_after_steps -= 1;
+            if drop_after_steps == 0 {
+                self.drop_at(self.size() / 2);
+                drop_after_steps = drop_frequency;
+            }
+            let sleep_duration = time::Duration::from_millis(500);
+            thread::sleep(sleep_duration);
+            print!("{}", self.get_clear_string());
+        }
+    }
 }
 
 impl fmt::Display for Pool {
@@ -93,6 +134,10 @@ impl From<&Pool> for String {
     fn from(pool: &Pool) -> Self {
         pool.current_state.iter().map(|c| char::from(c)).collect()
     }
+}
+
+impl WaterCell {
+    fn next_cell(&self, left: &WaterCell, right: &WaterCell) {}
 }
 
 impl fmt::Display for WaterCell {
@@ -130,19 +175,6 @@ impl From<&WaterCell> for char {
             },
         }
     }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-struct Surrounding {
-    left: SurroundingType,
-    right: SurroundingType,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-enum SurroundingType {
-    NotImportant,
-    Wave,
-    Wall,
 }
 
 fn identify_surrounding(
@@ -263,14 +295,8 @@ fn handle_still_or_collision(surrounding: &Surrounding) -> WaterCell {
 }
 
 fn main() {
-    let pool = Pool::new(5);
-    let larger_pool = Pool::new(10);
-    println!("{:?}", pool);
-    let one_sec = time::Duration::from_secs(1);
-    print!("{}", pool);
-    print!("{}", pool);
-    std::io::stdout().flush().unwrap();
-    thread::sleep(one_sec);
-    print!("{}", pool.get_clear_string());
-    print!("{}", larger_pool);
+    let mut pool = Pool::new(15);
+    pool.drop_at(3);
+    pool.drop_at(11);
+    pool.run_simulation_on_stdio();
 }
