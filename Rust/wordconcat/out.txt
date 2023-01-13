@@ -1,0 +1,10 @@
+contains s: true
+contains donnés: true
+contains donné: true
+now
+trying: d + onnés
+trying: do + nnés
+trying: don + nés
+trying: donn + és
+trying: donné + s
+319416 with 6 letters
