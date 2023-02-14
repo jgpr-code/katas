@@ -10,8 +10,8 @@ let buildMemory (line: string) =
     line.Split(",") |> Array.map (fun s -> int (s))
 
 let printMem (memory: int[]) =
-    for i in memory do
-        printf $"{i}, "
+    memory
+    |> Array.iter (printf "%d, ")
 
     printfn ""
 
@@ -32,6 +32,5 @@ let rec execMemory (cursor: int) (memory: int[]) =
 
 let results = lines |> Array.map (fun line -> line |> buildMemory |> execMemory 0)
 
-for result in results do
-    for i in result do
-        printf $"{i}, "
+results
+|> Array.iter (printMem)
