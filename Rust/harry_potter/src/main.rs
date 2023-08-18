@@ -2,6 +2,7 @@ use std::env;
 
 fn compute_price(books: &[u32]) -> f64 {
     let mut books_vec = books.to_vec();
+    books_vec.resize(5, 0);
     let mut count: u32 = books_vec.iter().sum();
     let mut price: u128 = 0;
     while count > 0 {
@@ -33,12 +34,41 @@ fn compute_price(books: &[u32]) -> f64 {
 }
 
 fn main() {
-    println!("Hello, world!");
     let mut args: Vec<u32> = env::args()
         .skip(1)
         .map(|s| s.parse::<u32>().unwrap())
         .collect();
-    println!("{:?}", args);
+    println!("Books {:?}", args);
     let price = compute_price(&mut args);
     println!("{}", price);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compute_price_example1() {
+        assert!(compute_price(&[1, 2, 1]) == 29.6);
+    }
+
+    #[test]
+    fn compute_price_example2() {
+        assert!(compute_price(&[2, 2, 2, 1, 1]) == 51.6);
+    }
+
+    #[test]
+    fn compute_price_no_books() {
+        assert!(compute_price(&[]) == 0.0)
+    }
+
+    #[test]
+    fn compute_price_one_book() {
+        assert!(compute_price(&[1]) == 8.0)
+    }
+
+    #[test]
+    fn compute_price_two_books() {
+        assert!(compute_price(&[1, 1]) == 16.0 * 0.95)
+    }
 }
