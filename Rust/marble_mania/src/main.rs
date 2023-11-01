@@ -1,4 +1,53 @@
+use std::rc::Rc;
+use std::{cell::RefCell, time::*};
 // very ugly solution
+
+// implement own linked list with Rc<RefCell>
+
+struct Node {
+    value: usize,
+    next: Option<Rc<RefCell<Node>>>,
+    prev: Option<Rc<RefCell<Node>>>,
+}
+
+struct LinkedList {
+    head: Rc<RefCell<Node>>,
+    cursor: Rc<RefCell<Node>>,
+}
+
+impl LinkedList {
+    fn new() -> Self {
+        let head = Rc::new(RefCell::new(Node {
+            value: 0,
+            next: None,
+            prev: None,
+        }));
+        LinkedList {
+            head: Rc::clone(&head),
+            cursor: Rc::clone(&head),
+        }
+    }
+    fn insert(&mut self, value: usize) {
+        let node = Rc::new(RefCell::new(Node {
+            value,
+            next: None,
+            prev: Some(Rc::clone(&self.cursor)),
+        }));
+        let curs = self.cursor.borrow_mut();
+        // curs.
+    }
+}
+
+// ADT
+// member:
+// - last_inserted_pos
+// - current_player
+// next_pos_to_insert() -> pos
+// remove_special() -> pos
+
+struct MarbleMania {
+    player_scores: Vec<usize>,
+}
 
 fn marbles(players: usize, marbles: usize) -> (usize, usize) {
     let mut scores: Vec<usize> = vec![0; players];
@@ -22,9 +71,9 @@ fn marbles(players: usize, marbles: usize) -> (usize, usize) {
         }
         current_pos %= current_len;
         current_player = (current_player + 1) % players;
-        // if marble < 30 {
-        //     println!("{:?}", placed);
-        // }
+        if marble < 30 {
+            println!("{:?}", placed);
+        }
     }
 
     let mut max_score = 0;
@@ -55,7 +104,12 @@ fn get_pos(offset: i32, current_pos: i32, current_len: i32) -> usize {
     pos as usize
 }
 
+// 0
+
 fn main() {
+    let mut foo = vec![1, 2, 3];
+    foo.insert(2, 4);
+    println!("{:?}", foo);
     // 0 1 2 3, len=4, cursor=4 => +2=>6 % 4 = 2 => +2=>4 % 4 =0
 
     // 10 players; last marble is worth 1618 points: high score is 8317​
@@ -72,6 +126,19 @@ fn main() {
     println!("{},{} = {}", 17, 1104, marbles(17, 1104).1);
     println!("{},{} = {}", 21, 6111, marbles(21, 6111).1);
     println!("{},{} = {}", 30, 5807, marbles(30, 5807).1);
+    let n_players = 17;
+    let n_marbles = 500_000;
+    let now = Instant::now();
+    let result = marbles(n_players, n_marbles);
+
+    let elapsed_time = now.elapsed();
+    println!(
+        "Running marbles({},{}) = {:?} took {} seconds.",
+        n_players,
+        n_marbles,
+        result,
+        elapsed_time.as_secs_f32()
+    );
 }
 
 #[cfg(test)]
