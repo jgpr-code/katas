@@ -1,52 +1,65 @@
-use std::rc::Rc;
-use std::{cell::RefCell, time::*};
-// very ugly solution
+mod cyclic_linked_list;
+use cyclic_linked_list::*;
+use std::time::*;
 
-// implement own linked list with Rc<RefCell>
-
-struct Node {
-    value: usize,
-    next: Option<Rc<RefCell<Node>>>,
-    prev: Option<Rc<RefCell<Node>>>,
-}
-
-struct LinkedList {
-    head: Rc<RefCell<Node>>,
-    cursor: Rc<RefCell<Node>>,
-}
-
-impl LinkedList {
-    fn new() -> Self {
-        let head = Rc::new(RefCell::new(Node {
-            value: 0,
-            next: None,
-            prev: None,
-        }));
-        LinkedList {
-            head: Rc::clone(&head),
-            cursor: Rc::clone(&head),
+fn max_player(scores: &[usize]) -> (usize, usize) {
+    let mut max_score = 0;
+    let mut max_index = 0;
+    for (index, score) in scores.iter().enumerate() {
+        if *score > max_score {
+            max_score = *score;
+            max_index = index;
         }
     }
-    fn insert(&mut self, value: usize) {
-        let node = Rc::new(RefCell::new(Node {
-            value,
-            next: None,
-            prev: Some(Rc::clone(&self.cursor)),
-        }));
-        let curs = self.cursor.borrow_mut();
-        // curs.
-    }
+    (max_index, max_score)
 }
-
-// ADT
-// member:
-// - last_inserted_pos
-// - current_player
-// next_pos_to_insert() -> pos
-// remove_special() -> pos
 
 struct MarbleMania {
     player_scores: Vec<usize>,
+}
+
+enum LinkedListVariant {
+    VectorBased,
+    LinkedListBased,
+}
+
+fn marbles_generic(players: usize, marbles: usize, variant: LinkedListVariant) -> (usize, usize) {
+    let mut scores: Vec<usize> = vec![0; players];
+    let mut current_player = 0;
+    let mut list = match variant {
+        LinkedListVariant::VectorBased => VectorList::new(),
+        _ => todo!(),
+    };
+    for marble in 0..=marbles {
+        if marble != 0 && marble % 23 == 0 {
+            scores[current_player] += marble;
+            list.move_cursor(-7);
+            scores[current_player] += list.remove();
+        } else {
+            list.move_cursor(1);
+            list.insert(marble);
+        }
+        current_player = (current_player + 1) % players;
+    }
+    max_player(&scores)
+}
+
+fn marbles2(players: usize, marbles: usize) -> (usize, usize) {
+    let mut scores: Vec<usize> = vec![0; players];
+    let mut current_player = 0;
+    let mut list = VectorList::new();
+    for marble in 0..=marbles {
+        if marble != 0 && marble % 23 == 0 {
+            scores[current_player] += marble;
+            list.move_cursor(-7);
+            scores[current_player] += list.remove();
+        } else {
+            list.move_cursor(1);
+            list.insert(marble);
+        }
+        current_player = (current_player + 1) % players;
+    }
+    max_player(&scores)
 }
 
 fn marbles(players: usize, marbles: usize) -> (usize, usize) {
@@ -71,22 +84,12 @@ fn marbles(players: usize, marbles: usize) -> (usize, usize) {
         }
         current_pos %= current_len;
         current_player = (current_player + 1) % players;
-        if marble < 30 {
-            println!("{:?}", placed);
-        }
+        // if marble < 30 {
+        //     println!("{:?}", placed);
+        // }
     }
 
-    let mut max_score = 0;
-    let mut max_index = 0;
-    for (index, score) in scores.into_iter().enumerate() {
-        if score > max_score {
-            max_score = score;
-            max_index = index;
-        }
-    }
-    //  16  8  17  4  18  19 2 24 20(25)10 21  5 22 11  1 12  6 13  3 14  7 15
-    // [16, 8, 17, 4, 18, 19, 24, 2, 25, 20, 10, 21, 5, 22, 11, 1, 12, 6, 13, 3, 14, 7, 15, 0]
-    (max_index, max_score)
+    max_player(&scores)
 }
 
 fn get_pos(offset: i32, current_pos: i32, current_len: i32) -> usize {
@@ -121,6 +124,7 @@ fn main() {
     // 21 players; last marble is worth 6111 points: high score is 54718​
 
     // 30 players; last marble is worth 5807 points: high score is 37305
+    println!("{},{} = {}", 10, 1618, marbles2(10, 1618).1);
     println!("{},{} = {}", 10, 1618, marbles(10, 1618).1);
     println!("{},{} = {}", 13, 7999, marbles(13, 7999).1);
     println!("{},{} = {}", 17, 1104, marbles(17, 1104).1);
@@ -163,5 +167,26 @@ mod tests {
     #[test]
     fn test_marbles_5() {
         assert_eq!(marbles(30, 5807).1, 37305);
+    }
+
+    #[test]
+    fn test_marbles2_1() {
+        assert_eq!(marbles2(10, 1618).1, 8317);
+    }
+    #[test]
+    fn test_marbles2_2() {
+        assert_eq!(marbles2(13, 7999).1, 146373);
+    }
+    #[test]
+    fn test_marbles2_3() {
+        assert_eq!(marbles2(17, 1104).1, 2764);
+    }
+    #[test]
+    fn test_marbles2_4() {
+        assert_eq!(marbles2(21, 6111).1, 54718);
+    }
+    #[test]
+    fn test_marbles2_5() {
+        assert_eq!(marbles2(30, 5807).1, 37305);
     }
 }
