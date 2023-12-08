@@ -50,10 +50,17 @@ fn main() {
     println!("Hello, world!");
     println!("{}", format!("{}{}", file!(), line!()).as_str());
     println!("{}", day7::modname());
+
     let r = regex!(r"\d+");
     let foo = r.find("h123d").unwrap();
     println!("match was {}", foo.as_str());
-    let a = regex!(r"(?x)(?P<opname>[-a-zA-Z#+]+)");
-    let m = a.find("needle").unwrap();
-    println!("m {}", m.as_str());
+    for _ in 0..10 {
+        let a = regex!(r"\d+");
+        let bar = a.find("uia234uiae").unwrap();
+        println!("match was {}", bar.as_str());
+    }
+
+    // let a = regex!(r"(?x)(?P<opname>[-a-zA-Z#+]+)");
+    // let m = a.find("needle").unwrap();
+    // println!("m {}", m.as_str());
 }
