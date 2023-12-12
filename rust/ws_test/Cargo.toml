@@ -1,0 +1,12 @@
+[workspace]
+
+members = [
+    "case1",
+    "case2",
+    "case3",
+    "common",
+    "user",
+]
+resolver = "2"
+
+[workspace.dependencies]
