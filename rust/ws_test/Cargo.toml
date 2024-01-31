@@ -8,5 +8,3 @@ members = [
     "user",
 ]
 resolver = "2"
-
-[workspace.dependencies]

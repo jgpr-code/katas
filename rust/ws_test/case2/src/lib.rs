@@ -1,8 +1,9 @@
-use common;
+use common::*;
 
 pub fn case2(left: usize, right: usize) -> usize {
-    common::print_module_name();
-    left * right
+    print_module_name();
+    let foo = num::integer::lcm(left, right);
+    left * right + foo
 }
 
 #[cfg(test)]

@@ -5,9 +5,10 @@ use common::*;
 pub fn case1(left: usize, right: usize) -> usize {
     print_module_name();
     foo!();
+    let foo = num::integer::lcm(left, right);
     let re = re!(r"test");
     println!("{}", re.find("needletest").unwrap().as_str());
-    left + right
+    left + right + foo
 }
 
 #[cfg(test)]
@@ -17,6 +18,6 @@ mod tests {
     #[test]
     fn case1_works() {
         let result = case1(2, 2);
-        assert_eq!(result, 4);
+        assert_eq!(result, 6);
     }
 }
