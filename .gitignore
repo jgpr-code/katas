@@ -15,3 +15,6 @@ Rust/**/Cargo.lock
 
 # Don't know what this is
 debug.log
+
+# Typst generates pdf's, don't add them
+*.pdf
