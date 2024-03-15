@@ -33,7 +33,18 @@ impl From<&str> for MinesField {
 
 impl MinesField {
     fn hint_field(&self) -> String {
-        String::from("0\n")
+        let mut answer = String::new();
+        for row in 0..self.rows {
+            for col in 0..self.cols {
+                if self.data[row * self.cols + col] == '*' {
+                    answer.push('*')
+                } else {
+                    answer.push('0')
+                }
+            }
+        }
+        answer.push('\n');
+        answer
     }
 }
 
@@ -49,6 +60,14 @@ mod test {
     fn field_1x1_no_mines() {
         let input = "1 1\n.\n";
         let expected = "0\n";
+        let field = MinesField::from(input);
+        assert_eq!(expected, field.hint_field().as_str());
+    }
+
+    #[test]
+    fn field_1x1_one_mine() {
+        let input = "1 1\n*\n";
+        let expected = "*\n";
         let field = MinesField::from(input);
         assert_eq!(expected, field.hint_field().as_str());
     }
